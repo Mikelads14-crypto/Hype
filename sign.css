@@ -1,0 +1,38 @@
+:root{
+    --primary--color:rgb(2, 134, 9);
+}
+
+
+#SignUp{
+    background-color: white;
+    margin-top: 10px;
+    margin-left:3px;
+    width:400px;
+    height: 500px;
+    border-radius:5px;
+    padding:3px;
+}
+#New{
+    color:var(--primary--color);
+    margin-left:30%;
+}
+.sign-input{
+border:solid 1.7px rgb(2, 134, 9);
+width:300px;
+height:19.5px;
+border-radius:2px;
+margin-left:5%;
+border-top:none;
+border-left:none;
+border-right:none;
+
+}
+.tit{
+    margin-left:5%;
+}
+#sin{
+    margin-top:5%
+}
+p{
+    font-size: 17px;
+}
