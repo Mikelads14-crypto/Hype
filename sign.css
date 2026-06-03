@@ -5,12 +5,13 @@
 
 #SignUp{
     background-color: white;
-    margin-top: 10px;
+    margin-top: 10%;
     margin-left:3px;
-    width:400px;
+    width:380px;
     height: 500px;
     border-radius:5px;
     padding:3px;
+    
       animation: fadeIn 1s ease-in-out;
         }
         @keyframes fadeIn {
@@ -21,7 +22,7 @@
 
 #New{
     color:var(--primary--color);
-    margin-left:30%;
+    margin-left:28%;
 }
 .sign-input{
 border:solid 1.7px rgb(2, 134, 9);
@@ -42,4 +43,16 @@ border-right:none;
 }
 p{
     font-size: 17px;
+}
+#tec{
+    width:100px;
+    height:100px;
+margin-left: 10%;
+margin-top: -20%;
+     
+    
+}
+#logo
+{
+    margin-top: -38%;
 }
