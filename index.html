@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hype - Extreme Assessment Platform</title>
+    <title>Hype - FlexiQuiz Style Assessment Engine</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Iconsz CDN -->
+    <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
         :root {
             --primary-color: #00b30f;
-            --hype-gradient: linear-gradient(to right, #00b30f, #008cff 50%);
-            --hype-bg: rgb(216, 216, 216);
+            --hype-gradient: linear-gradient(135deg, #00b30f 0%, #008cff 100%);
+            --hype-bg: #f3f4f6;
             --hype-text-color: #1f2937;
+            --card-radius: 12px;
         }
 
         body {
@@ -25,7 +26,6 @@
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* Dynamic Themeable Gradient Buttons */
         .btn-hype-gradient {
             background: var(--hype-gradient);
             background-size: 200% 100%;
@@ -34,12 +34,11 @@
         .btn-hype-gradient:hover {
             background-position: right center;
             transform: translateY(-1px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 15px -3px rgba(0, 179, 15, 0.2);
         }
 
-        /* Custom Dynamic Underlines and Inputs */
         .hype-input {
-            border-bottom: solid 1.7px var(--primary-color);
+            border-bottom: solid 2px var(--primary-color);
             background: transparent;
             outline: none;
             transition: all 0.3s ease;
@@ -49,27 +48,29 @@
             border-bottom-width: 2.5px;
         }
 
-        /* Custom theme badges */
-        .theme-accent-border {
-            border-color: var(--primary-color);
-        }
-        .theme-accent-text {
-            color: var(--primary-color);
-        }
-        .theme-accent-bg {
-            background-color: var(--primary-color);
+        /* Glassmorphism details */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
 
-        /* Dynamic view animations */
         .animate-fade-in {
             animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(16px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Scrollbar aesthetics */
+        /* FlexiQuiz specific tabular layouts */
+        .flexi-tab-active {
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -88,260 +89,306 @@
     <!-- Navigation Header -->
     <nav class="bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-40 px-6 py-4 flex justify-between items-center">
         <div class="flex items-center space-x-3 cursor-pointer" id="logo-nav">
-            <div class="w-10 h-10 rounded-lg btn-hype-gradient flex items-center justify-center text-white font-black italic text-xl shadow-md">H</div>
+            <div class="w-10 h-10 rounded-xl btn-hype-gradient flex items-center justify-center text-white font-black italic text-xl shadow-md">H</div>
             <div>
-                <span class="text-2xl font-black theme-accent-text tracking-tight">HYPE</span>
-                <span class="text-[9px] block text-gray-400 tracking-widest font-bold uppercase">Enterprise Engine</span>
+                <span class="text-2xl font-black tracking-tight theme-accent-text" style="color: var(--primary-color);">HYPE</span>
+                <span class="text-[9px] block text-gray-400 tracking-widest font-bold uppercase">FlexiQuiz Engine</span>
             </div>
         </div>
         <div class="flex items-center space-x-6">
-            <!-- Active Connection Badge -->
+            <!-- Sync/Network Status -->
             <div id="network-badge" class="flex items-center text-sm font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-100 transition-all duration-300">
                 <i data-lucide="wifi" class="w-4 h-4 mr-1.5 animate-pulse"></i>
-                <span>Cloud Synced</span>
+                <span>Database Syncing</span>
             </div>
-            <!-- Profile Space -->
+            <!-- Profile Area -->
             <div id="user-profile" class="hidden flex items-center space-x-4 border-l pl-6 border-gray-200">
                 <div class="flex flex-col text-right">
                     <span id="nav-username" class="font-bold text-gray-800 text-sm">Operator</span>
-                    <span class="text-xs text-[#008cff] font-semibold uppercase tracking-wider">Authenticated</span>
+                    <span id="nav-user-role" class="text-xs text-[#008cff] font-semibold uppercase tracking-wider">Workspace Administrator</span>
                 </div>
-                <button id="btn-logout" class="p-2 text-red-500 hover:bg-red-50 rounded-full transition-all">
+                <button id="btn-logout" class="p-2 text-red-500 hover:bg-red-50 rounded-full transition-all" title="Sign Out">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
     </nav>
 
-    <!-- Master Screen Mounting Container -->
-    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 md:p-8">
-        
-        <!-- VIEW 1: AUTHENTICATION SCREEN -->
-        <div id="view-auth" class="bg-white w-full max-w-[400px] rounded-xl p-8 shadow-2xl border border-gray-100 animate-fade-in flex flex-col justify-between min-h-[500px]">
-            <div>
-                <div class="text-center mb-8">
-                    <h2 id="auth-header" class="text-3xl font-black theme-accent-text tracking-wide mb-2">Create Account</h2>
-                    <p id="auth-subheader" class="text-gray-400 text-sm font-medium">Join the cloud assessment workspace.</p>
+    <!-- Master View Canvas -->
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 lg:p-8">
+
+        <!-- VIEW 1: ADVANCED SIGN-UP / SIGN-IN SPLIT SCREEN -->
+        <div id="view-auth" class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden animate-fade-in grid grid-cols-1 md:grid-cols-12 min-h-[600px]">
+            <!-- Left Panel: Graphic Branding Side -->
+            <div class="md:col-span-5 btn-hype-gradient p-8 text-white flex flex-col justify-between relative overflow-hidden">
+                <!-- Decorative bubble backgrounds -->
+                <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full bg-white/10 blur-xl"></div>
+                <div class="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-white/10 blur-2xl"></div>
+
+                <div class="space-y-2 z-10">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                        <span class="text-2xl font-black text-green-600 italic">H</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold tracking-tight mt-6">Next-Gen Evaluation Workspace</h1>
+                    <p class="text-white/80 text-sm leading-relaxed">Design interactive quizzes, configure auto-grading constraints, protect workspaces with real-time video/fullscreen security proctors, and distribute direct access URLs instantly.</p>
                 </div>
-                
-                <form id="auth-form" class="space-y-6">
-                    <div id="group-name" class="flex flex-col">
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Full Name</label>
-                        <input type="text" id="auth-name" class="hype-input py-2 text-gray-800 text-base" placeholder="Enter Your Name" required>
+
+                <div class="z-10 space-y-4">
+                    <div class="flex items-center space-x-3 text-sm bg-white/10 rounded-xl p-3 border border-white/10">
+                        <i data-lucide="shield-check" class="text-green-300 w-5 h-5 flex-shrink-0"></i>
+                        <span>FlexiQuiz Auto-Correction Engine</span>
                     </div>
-                    <div class="flex flex-col">
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Email Address</label>
-                        <input type="email" id="auth-email" class="hype-input py-2 text-gray-800 text-base" placeholder="your@email.com" required>
+                    <p class="text-[10px] text-white/60 tracking-wider font-semibold uppercase">Hype Enterprise Core &copy; 2026</p>
+                </div>
+            </div>
+
+            <!-- Right Panel: Core Interactive Inputs Form -->
+            <div class="md:col-span-7 p-8 sm:p-12 flex flex-col justify-center">
+                <div class="flex border-b border-gray-100 pb-4 mb-6">
+                    <button id="tab-auth-login" class="flex-1 text-center py-2 font-bold text-gray-400 hover:text-gray-800 transition">Sign In Portal</button>
+                    <button id="tab-auth-register" class="flex-1 text-center py-2 font-bold border-b-2 border-b-green-500 text-green-600 transition">Create Account</button>
+                </div>
+
+                <form id="auth-form" class="space-y-5">
+                    <div id="auth-field-name" class="flex flex-col space-y-1">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-widest">Full Name / Workspace Title</label>
+                        <input type="text" id="auth-name" class="hype-input py-2 text-gray-800" placeholder="Enter full name" required>
                     </div>
-                    <div class="flex flex-col">
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Security Password</label>
-                        <input type="password" id="auth-password" class="hype-input py-2 text-gray-800 text-base" placeholder="••••••••" required>
+                    <div class="flex flex-col space-y-1">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-widest">Email Address</label>
+                        <input type="email" id="auth-email" class="hype-input py-2 text-gray-800" placeholder="operator@hype.com" required>
+                    </div>
+                    <div class="flex flex-col space-y-1">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-widest">Security Password</label>
+                        <input type="password" id="auth-password" class="hype-input py-2 text-gray-800" placeholder="••••••••" required>
                     </div>
 
-                    <div class="text-right">
-                        <button type="button" id="btn-toggle-auth" class="text-xs theme-accent-text hover:text-[#008cff] font-bold tracking-wide transition">
-                            Already have an account? Sign In
-                        </button>
+                    <!-- Role Selection -->
+                    <div id="auth-field-role" class="flex flex-col space-y-2 pt-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-widest">Account Workspace Role</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="border rounded-xl p-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition border-gray-200" id="role-admin-card">
+                                <span class="text-xs font-bold text-gray-700">Administrator (Creator)</span>
+                                <input type="radio" name="auth-role" value="admin" checked class="accent-green-500">
+                            </label>
+                            <label class="border rounded-xl p-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition border-gray-200" id="role-student-card">
+                                <span class="text-xs font-bold text-gray-700">Candidate (Test Taker)</span>
+                                <input type="radio" name="auth-role" value="student" class="accent-green-500">
+                            </label>
+                        </div>
                     </div>
 
-                    <button type="submit" class="w-full h-12 rounded-lg text-white font-bold text-base btn-hype-gradient shadow-lg uppercase tracking-wider">
+                    <button type="submit" class="w-full h-12 rounded-xl text-white font-bold text-sm btn-hype-gradient shadow-lg uppercase tracking-wider pt-0.5">
                         Submit Credentials
                     </button>
                 </form>
             </div>
-            <footer class="text-center mt-6 pt-4 border-t border-gray-50">
-                <p class="text-[10px] text-gray-400 tracking-wider">Hype &copy; 2026 All rights reserved</p>
-            </footer>
         </div>
 
-        <!-- VIEW 2: DASHBOARD SCREEN -->
+        <!-- VIEW 2: FLEXIQUIZ MASTER DASHBOARD -->
         <div id="view-dashboard" class="hidden w-full max-w-6xl bg-white rounded-2xl shadow-xl p-6 sm:p-8 animate-fade-in min-h-[75vh] flex flex-col justify-between">
             <div>
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-6 mb-8 gap-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-100 pb-6 mb-8 gap-4">
                     <div>
-                        <h2 class="text-3xl font-extrabold text-gray-800 tracking-tight">Assessment Dashboard</h2>
-                        <p class="text-gray-400 text-sm">Design cloud assessments, configure automated grading, and customize visual themes.</p>
+                        <h2 class="text-3xl font-extrabold text-gray-800 tracking-tight">Unified Assessments Dashboard</h2>
+                        <p class="text-gray-400 text-sm mt-0.5">Enterprise scale creation tool matching FlexiQuiz templates, direct links, and proctored records.</p>
                     </div>
-                    <button id="btn-create-quiz" class="btn-hype-gradient text-white font-bold px-6 py-3 rounded-xl flex items-center shadow-md text-sm uppercase tracking-wider">
-                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Design New Quiz
-                    </button>
+                    <div class="flex space-x-3 w-full sm:w-auto">
+                        <button id="btn-create-quiz" class="btn-hype-gradient text-white font-bold px-6 py-3 rounded-xl flex items-center shadow-md text-sm uppercase tracking-wider flex-grow justify-center sm:flex-grow-0">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Design New Quiz
+                        </button>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Left: Assessments List -->
-                    <div class="bg-gray-50/60 rounded-2xl p-6 border border-gray-100">
+                <!-- Admin Perspective -->
+                <div id="dashboard-admin-view" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- Left: Quiz Templates Grid -->
+                    <div class="lg:col-span-7 bg-gray-50/60 rounded-2xl p-6 border border-gray-100">
                         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                            <i data-lucide="file-text" class="w-5 h-5 text-[#008cff] mr-2"></i> Available Quizzes
+                            <i data-lucide="file-text" class="w-5 h-5 text-[#008cff] mr-2"></i> Created Quiz Templates
                         </h3>
-                        <div id="quiz-list-container" class="space-y-4 max-h-[45vh] overflow-y-auto pr-2">
-                            <!-- Injected by JS -->
-                            <div class="text-center py-12 text-gray-400 italic">No quizzes designed yet. Let's make one!</div>
+                        <div id="quiz-list-container" class="space-y-4 max-h-[450px] overflow-y-auto pr-2">
+                            <!-- Populated Dynamically -->
                         </div>
                     </div>
 
-                    <!-- Right: Performance History -->
-                    <div class="bg-gray-50/60 rounded-2xl p-6 border border-gray-100">
-                        <h3 class="text-lg font-bold theme-accent-text mb-4 flex items-center">
-                            <i data-lucide="bar-chart-2" class="w-5 h-5 mr-2"></i> Enterprise Metrics
+                    <!-- Right: Candidate Scores & Proctor Logs -->
+                    <div class="lg:col-span-5 bg-gray-50/60 rounded-2xl p-6 border border-gray-100">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="bar-chart-2" class="w-5 h-5 text-green-600 mr-2"></i> Real-time Results & Analytics
                         </h3>
-                        <div id="results-list-container" class="space-y-4 max-h-[45vh] overflow-y-auto pr-2">
-                            <!-- Injected by JS -->
-                            <div class="text-center py-12 text-gray-400 italic">No metrics generated yet. Once a participant finishes, results populate instantly here.</div>
+                        <div id="results-list-container" class="space-y-4 max-h-[450px] overflow-y-auto pr-2">
+                            <!-- Populated Dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Candidate Perspective -->
+                <div id="dashboard-student-view" class="hidden grid grid-cols-1 gap-6">
+                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-6 text-center max-w-xl mx-auto space-y-4">
+                        <i data-lucide="info" class="w-12 h-12 text-[#008cff] mx-auto"></i>
+                        <h3 class="text-lg font-bold text-blue-900">Welcome to Hype Candidates Workspace</h3>
+                        <p class="text-sm text-blue-800">To proceed with examinations, kindly request the unique publish link or passcode of the target assessment from your administrator.</p>
+                        <div class="flex space-x-2">
+                            <input type="text" id="student-quiz-code" class="flex-1 px-4 py-2 border rounded-xl outline-none" placeholder="Enter Assessment ID Code...">
+                            <button id="btn-student-go" class="bg-[#008cff] text-white font-bold px-6 py-2 rounded-xl">Go</button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="text-center border-t border-gray-100 pt-6 mt-8">
-                <p class="text-[11px] text-gray-400 tracking-widest uppercase">System Operations Online • Hypertext Protocol Secured</p>
+                <p class="text-[11px] text-gray-400 tracking-widest uppercase font-semibold">Security Level High • Cloud Synced Ledger Operations</p>
             </div>
         </div>
 
-        <!-- VIEW 3: QUIZ BUILDER SCREEN -->
+        <!-- VIEW 3: SYSTEM QUIZ BUILDER CORE -->
         <div id="view-builder" class="hidden w-full max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in min-h-[85vh] flex flex-col">
-            <!-- Header bar -->
+            <!-- Builder Top Navigation Control -->
             <div class="bg-gray-900 text-white p-6 flex justify-between items-center border-b border-gray-800">
                 <div class="flex items-center space-x-3">
-                    <i data-lucide="settings" class="w-6 h-6 text-green-500 animate-spin-slow"></i>
+                    <div class="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center text-green-500">
+                        <i data-lucide="settings" class="w-5 h-5 animate-spin-slow"></i>
+                    </div>
                     <div>
-                        <h2 class="text-xl font-bold tracking-tight">App Builder Pro</h2>
-                        <p class="text-xs text-gray-400">Enterprise Scale Assessment Architecture</p>
+                        <h2 class="text-lg font-bold tracking-tight">FlexiQuiz Creator Cockpit</h2>
+                        <p class="text-xs text-gray-400">Build 12 Question types & adjust 30 distinct parameters</p>
                     </div>
                 </div>
                 <div class="flex space-x-3">
-                    <button id="btn-builder-cancel" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition font-medium">Cancel</button>
+                    <button id="btn-builder-cancel" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition font-medium">Cancel Design</button>
                     <button id="btn-builder-save" class="bg-green-500 hover:bg-green-600 text-white text-sm font-bold px-6 py-2.5 rounded-xl shadow transition flex items-center">
-                        <i data-lucide="save" class="w-4 h-4 mr-2"></i> Save & Cloud Sync
+                        <i data-lucide="save" class="w-4 h-4 mr-2"></i> Publish Assessment
                     </button>
                 </div>
             </div>
 
-            <!-- Configuration tabs -->
+            <!-- Builder Configuration Panels -->
             <div class="flex border-b border-gray-100 bg-gray-50/50">
-                <button id="tab-questions" class="flex-1 py-4 font-bold text-sm tracking-wide text-center border-b-2 border-b-green-500 text-green-500">
-                    1. Build Questions (12 Interactive Types)
+                <button id="tab-questions" class="flex-1 py-4 font-bold text-sm text-center border-b-2 border-b-green-500 text-green-500">
+                    1. Build Questions (12 Dynamic Types)
                 </button>
-                <button id="tab-settings" class="flex-1 py-4 font-bold text-sm tracking-wide text-center border-b-2 border-b-transparent text-gray-400 hover:text-gray-600">
+                <button id="tab-settings" class="flex-1 py-4 font-bold text-sm text-center border-b-2 border-b-transparent text-gray-400 hover:text-gray-600">
                     2. Configure Engine (30 Critical Settings & Themes)
                 </button>
             </div>
 
-            <!-- Core Working Pane -->
+            <!-- Main Working Canvas Grid -->
             <div class="flex-grow flex flex-col lg:flex-row overflow-hidden h-[60vh]">
-                <!-- PANEL A: QUESTION BUILDER -->
+                <!-- TAB A: QUESTIONS EDIT ZONE -->
                 <div id="pane-questions" class="flex-grow flex h-full w-full overflow-hidden">
-                    <!-- Left Toolbar: 12 Working Question Types -->
+                    <!-- Sidebar Question Add Controls -->
                     <div class="w-64 bg-gray-50 border-r border-gray-100 p-4 overflow-y-auto flex-shrink-0 hidden md:block">
-                        <h3 class="font-bold text-xs text-gray-400 uppercase tracking-widest mb-3">Assessment Nodes</h3>
+                        <h3 class="font-bold text-xs text-gray-400 uppercase tracking-widest mb-3">Add Question Type</h3>
                         <div class="space-y-2" id="toolbar-question-types">
-                            <!-- Buttons loaded by JavaScript -->
+                            <!-- Populated dynamically -->
                         </div>
                     </div>
 
-                    <!-- Right Workspace -->
+                    <!-- Right Main Questions Editor -->
                     <div class="flex-grow p-6 overflow-y-auto flex flex-col space-y-6 bg-slate-50/30">
                         <div class="md:hidden flex overflow-x-auto py-2 space-x-2 border-b pb-4 mb-2 flex-shrink-0">
-                            <!-- Mobile horizontal scrollbar for adding questions -->
+                            <!-- Mobile layout types helper -->
                             <div class="flex space-x-2" id="toolbar-question-types-mobile"></div>
                         </div>
                         <div id="questions-workspace" class="space-y-6 pb-20">
-                            <!-- Injected Dynamically -->
+                            <!-- Populated dynamically -->
                         </div>
                     </div>
                 </div>
 
-                <!-- PANEL B: 30 SETTINGS MODULES & THEME SELECTOR -->
+                <!-- TAB B: 30 PRECISE CONFIGURATIONS & CUSTOM THEMES -->
                 <div id="pane-settings" class="hidden flex-grow p-6 overflow-y-auto w-full bg-slate-50/20">
-                    <!-- Theme Selector Section -->
+                    <!-- Modern Visual Themes Selector -->
                     <div class="mb-8 p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                        <h3 class="font-extrabold text-[#00b30f] border-b pb-2 text-sm uppercase tracking-widest mb-4">
-                            Visual Theme & Presentation Layer
+                        <h3 class="font-extrabold text-[#00b30f] border-b pb-2 text-sm uppercase tracking-widest mb-4 flex items-center">
+                            <i data-lucide="palette" class="w-4 h-4 mr-2"></i> Custom Visual Themes
                         </h3>
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="theme-grid">
-                            <!-- Populated Dynamically by JS -->
+                            <!-- Dynamic rendering of themes -->
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12" id="settings-grid">
-                        <!-- 30 Settings dynamically generated -->
+                        <!-- Dynamic rendering of the 30 FlexiQuiz parameters -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- VIEW 4: QUIZ PLAYER (PROCTORING SHELL) -->
+        <!-- VIEW 4: SECURED TESTING ENGINE WINDOW -->
         <div id="view-player" class="hidden w-full max-w-4xl bg-white rounded-2xl shadow-2xl p-6 sm:p-8 animate-fade-in min-h-[60vh] flex flex-col justify-between relative">
             
-            <!-- Instructions Screen (Pre-Start) -->
+            <!-- Instructions and Consent Screen -->
             <div id="player-prestart" class="space-y-6">
                 <div class="text-center space-y-2">
                     <h2 id="player-title" class="text-3xl font-extrabold text-gray-800 tracking-tight">System Assessment</h2>
-                    <p id="player-desc" class="text-gray-400 text-sm font-medium">Secure digital gateway. Read guidelines carefully.</p>
+                    <p id="player-desc" class="text-gray-400 text-sm font-medium">Secure examination gateway. Carefully read instructions.</p>
                 </div>
 
-                <div class="bg-amber-50/80 rounded-xl p-5 border border-amber-100 space-y-3">
+                <div class="bg-amber-50 rounded-xl p-5 border border-amber-100 space-y-3">
                     <h4 class="text-sm font-bold text-amber-800 uppercase tracking-widest flex items-center">
-                        <i data-lucide="alert-triangle" class="w-4 h-4 mr-1.5"></i> Proctoring Security Systems Active
+                        <i data-lucide="alert-triangle" class="w-4 h-4 mr-1.5 animate-bounce"></i> ACTIVE PROCTOR SEVERITY PROTOCOLS
                     </h4>
                     <ul class="text-xs text-amber-900 space-y-2 list-disc pl-5 font-medium leading-relaxed">
-                        <li><strong>Fullscreen Constraint:</strong> Once started, fullscreen mode is strictly controlled. Exiting triggers log actions.</li>
-                        <li><strong>Environment Blur Tracker:</strong> Navigating to separate tabs or minimizing registers instantly as a security alert.</li>
-                        <li><strong>Clipboard Lockdown:</strong> High-security encryption prevents cutting, copying, or pasting anything in this engine.</li>
-                        <li><strong>Proctor Video stream:</strong> Webcam capture registers environmental metrics periodically if enforced by your administrator.</li>
+                        <li><strong>Forced Fullscreen:</strong> Exiting fullscreen mode logs security warnings immediately.</li>
+                        <li><strong>Tab Visibility Tracker:</strong> Minimize/unfocus events will immediately lock score matrix credentials.</li>
+                        <li><strong>Clipboard Lockdown:</strong> Copying, cutting, pasting, and mouse right-clicking are fully blocked.</li>
+                        <li><strong>Webcam Feed:</strong> PERIODIC photo metrics monitor candidate identity verification.</li>
                     </ul>
                 </div>
 
-                <div class="flex flex-col space-y-2 text-center text-xs font-semibold text-gray-500">
-                    <p id="player-meta-theme">Selected Theme Layout: Classic Hype</p>
-                    <p id="player-meta-time">Time Allocation: Not Set</p>
-                    <p id="player-meta-questions">Node Count: 0</p>
+                <div class="flex flex-col space-y-2 text-center text-xs font-semibold text-gray-500 bg-gray-50 p-4 rounded-xl">
+                    <p id="player-meta-theme">Theme: Classic Hype</p>
+                    <p id="player-meta-time">Time Allowed: 10 minutes</p>
+                    <p id="player-meta-questions">Total Items: 0</p>
                 </div>
 
                 <div class="pt-4 border-t border-gray-100 flex justify-center">
                     <button id="btn-player-begin" class="btn-hype-gradient text-white font-extrabold text-base px-10 py-3 rounded-xl shadow-lg tracking-wide uppercase">
-                        Begin Secured Assessment
+                        Initialize Session
                     </button>
                 </div>
             </div>
 
-            <!-- Secured Active Examination Canvas -->
+            <!-- Secured Examination Stage Interface -->
             <div id="player-canvas" class="hidden flex-grow flex flex-col justify-between space-y-8">
-                <!-- Session telemetry bar -->
+                <!-- Live Monitor Panel -->
                 <div class="flex justify-between items-center border-b pb-4">
                     <div>
-                        <span class="text-xs font-black uppercase tracking-widest theme-accent-text">Session Active</span>
+                        <span class="text-xs font-black uppercase tracking-widest text-[#00b30f] theme-accent-text">Session Active</span>
                         <h4 id="player-active-title" class="text-lg font-extrabold text-gray-800">Assessing Nodes</h4>
                     </div>
                     <div class="flex items-center space-x-6">
-                        <!-- Video Capture HUD -->
+                        <!-- Webcam Feed Frame -->
                         <div id="proctor-hud" class="relative w-24 h-16 bg-slate-900 rounded-lg overflow-hidden border border-slate-700 hidden">
                             <video id="proctor-webcam" autoplay muted class="w-full h-full object-cover"></video>
                             <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
                         </div>
-                        <!-- Timer HUD -->
+                        <!-- Countdown Timer -->
                         <div id="timer-hud" class="text-xl font-black font-mono text-red-500 bg-red-50 px-4 py-2 rounded-xl border border-red-100">
                             00:00
                         </div>
                     </div>
                 </div>
 
-                <!-- Progress Bar -->
+                <!-- Progress Tracker -->
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                     <div id="player-progress" class="btn-hype-gradient h-full w-0 transition-all duration-300"></div>
                 </div>
 
-                <!-- Active Question Content -->
+                <!-- Question Core Render Stage -->
                 <div class="py-4 flex-grow">
                     <div class="flex items-center justify-between mb-4">
                         <span id="player-node-number" class="text-sm font-extrabold text-gray-400">Node 1 of 1</span>
                         <span id="player-node-points" class="text-xs font-bold text-gray-400 tracking-widest uppercase">Value: 1 pt</span>
                     </div>
-                    <h3 id="player-question-text" class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 leading-snug">Question loading...</h3>
+                    <h3 id="player-question-text" class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 leading-snug">Question is loading...</h3>
                     <div id="player-render-zone" class="space-y-4">
-                        <!-- Rendered dynamically -->
+                        <!-- Dynamic renderer -->
                     </div>
                 </div>
 
-                <!-- Footer Navigation controls -->
+                <!-- Footer Operations controls -->
                 <div class="flex justify-between items-center border-t pt-6">
                     <button id="btn-player-prev" class="flex items-center text-sm font-bold text-gray-500 hover:text-gray-800 transition py-2 px-4 rounded-lg hover:bg-slate-50">
                         <i data-lucide="arrow-left" class="w-4 h-4 mr-1.5"></i> Back Node
@@ -353,42 +400,44 @@
             </div>
         </div>
 
-        <!-- VIEW 5: RESULTS AND METRIC VISUALIZATION -->
+        <!-- VIEW 5: DETAILED RESULTS AND ANALYTICS REVIEW -->
         <div id="view-results" class="hidden w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in flex flex-col min-h-[60vh]">
             <div id="result-header-bg" class="p-8 text-center text-white bg-gradient-to-r from-[#00b30f] to-green-600 space-y-2">
-                <span class="text-xs font-black uppercase tracking-widest text-white/80">Evaluation Complete</span>
-                <h2 class="text-4xl font-black tracking-tight" id="result-user-title">Quiz Completed!</h2>
-                <p class="text-sm font-medium opacity-90" id="result-quiz-title">Enterprise Logistics Quiz</p>
+                <span class="text-xs font-black uppercase tracking-widest text-white/80">Evaluation Completed</span>
+                <h2 class="text-4xl font-black tracking-tight" id="result-user-title">Submission Recorded</h2>
+                <p class="text-sm font-medium opacity-90" id="result-quiz-title">Logistics Examination</p>
             </div>
 
             <div class="p-8 sm:p-10 grid grid-cols-1 md:grid-cols-4 gap-8 text-center border-b border-gray-100">
                 <div class="space-y-1">
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Acquisition Rate</p>
-                    <p class="text-5xl font-extrabold text-[#00b30f] theme-accent-text" id="result-metric-percentage">0%</p>
+                    <p class="text-5xl font-extrabold theme-accent-text" id="result-metric-percentage" style="color: var(--primary-color);">0%</p>
                 </div>
                 <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Graded Points</p>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Points</p>
                     <p class="text-4xl font-bold text-gray-800"><span id="result-metric-points">0</span> <span class="text-lg text-gray-300">/ <span id="result-metric-total">0</span></span></p>
                 </div>
                 <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Security Violations</p>
-                    <p class="text-4xl font-bold text-gray-800" id="result-metric-warnings">0</p>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Proctor Warnings</p>
+                    <p class="text-4xl font-bold text-red-500" id="result-metric-warnings">0</p>
                 </div>
                 <div class="space-y-1">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Required Grade Met</p>
-                    <p class="text-xl font-black uppercase tracking-wider text-green-600" id="result-metric-passed">N/A</p>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Passing Matrix Status</p>
+                    <p class="text-xl font-black uppercase tracking-wider" id="result-metric-passed">N/A</p>
                 </div>
             </div>
 
-            <!-- Detailed breakdown of the correct answers and your inputs -->
-            <div class="p-6 overflow-y-auto max-h-[40vh] bg-slate-50/50" id="result-matrix-review-container">
-                <h3 class="font-bold text-sm text-gray-700 mb-4 uppercase tracking-wider">Diagnostic Corrective Review</h3>
+            <!-- Diagnostics review grid -->
+            <div class="p-6 overflow-y-auto max-h-[350px] bg-slate-50/50" id="result-matrix-review-container">
+                <h3 class="font-bold text-sm text-gray-700 mb-4 uppercase tracking-wider flex items-center">
+                    <i data-lucide="award" class="w-4 h-4 mr-2"></i> Corrective Diagnostic Review
+                </h3>
                 <div class="space-y-4" id="result-matrix-review">
                     <!-- Loaded dynamically -->
                 </div>
             </div>
 
-            <div class="p-6 bg-slate-100 flex justify-center space-x-4">
+            <div class="p-6 bg-slate-100 flex justify-center">
                 <button id="btn-result-close" class="bg-gray-800 hover:bg-gray-900 text-white font-bold text-sm px-8 py-3 rounded-xl shadow-md transition-all">
                     Return to Dashboard
                 </button>
@@ -397,7 +446,7 @@
 
     </main>
 
-    <!-- Master Modal UI Overlay (Replaces standard window.alert) -->
+    <!-- Master Custom Modal UI Overlay (Replaces alert) -->
     <div id="hype-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl transform scale-95 transition-all space-y-6">
             <div class="flex items-center space-x-3">
@@ -405,32 +454,32 @@
                     <i data-lucide="alert-triangle" class="w-6 h-6" id="modal-icon"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-extrabold text-gray-900" id="modal-title">Notification</h3>
-                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold">System Dispatch</p>
+                    <h3 class="text-lg font-extrabold text-gray-900" id="modal-title">System Alert</h3>
+                    <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold">Workspace Engine Dispatch</p>
                 </div>
             </div>
-            <p class="text-sm text-gray-600 leading-relaxed font-medium" id="modal-message">System event logged.</p>
+            <p class="text-sm text-gray-600 leading-relaxed font-medium" id="modal-message">Incident recorded.</p>
             <div class="flex justify-end pt-2">
                 <button id="btn-modal-dismiss" class="btn-hype-gradient text-white font-extrabold text-xs px-6 py-2.5 rounded-lg shadow-md uppercase tracking-wider">
-                    Confirm Log
+                    Confirm Dispatch
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase core SDK configuration -->
+    <!-- Firebase web SDK architecture modules -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, addDoc, getDocs, updateDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- GLOBAL THEME SCHEMES ---
+        // --- VISUAL PALETTE SKINS ---
         const THEME_PRESETS = {
             hype: {
                 name: 'Classic Hype',
                 primary: '#00b30f',
                 gradient: 'linear-gradient(to right, #00b30f, #008cff 50%)',
-                bg: 'rgb(216, 216, 216)',
+                bg: '#f3f4f6',
                 text: '#1f2937',
                 accentText: '#00b30f'
             },
@@ -438,7 +487,7 @@
                 name: 'Solar Blaze',
                 primary: '#ea580c',
                 gradient: 'linear-gradient(to right, #ea580c, #e11d48 50%)',
-                bg: '#fef3c7',
+                bg: '#fffbeb',
                 text: '#1f2937',
                 accentText: '#ea580c'
             },
@@ -454,7 +503,7 @@
                 name: 'Emerald Forest',
                 primary: '#059669',
                 gradient: 'linear-gradient(to right, #059669, #0369a1 50%)',
-                bg: '#d1fae5',
+                bg: '#ecfdf5',
                 text: '#064e3b',
                 accentText: '#059669'
             },
@@ -462,7 +511,7 @@
                 name: 'Cosmic Dust',
                 primary: '#ec4899',
                 gradient: 'linear-gradient(to right, #ec4899, #8b5cf6 50%)',
-                bg: '#fae8ff',
+                bg: '#fdf2f8',
                 text: '#4a044e',
                 accentText: '#ec4899'
             }
@@ -475,18 +524,17 @@
             document.documentElement.style.setProperty('--hype-bg', config.bg);
             document.documentElement.style.setProperty('--hype-text-color', config.text);
             
-            // Adjust body tag parameters dynamically
-            document.body.className = `min-h-screen flex flex-col selection:bg-green-500 selection:text-white`;
-            
-            // Re-render any icons dynamically that need custom primary-color colors
+            document.body.style.backgroundColor = config.bg;
+            document.body.style.color = config.text;
+
             const dynamicAccents = document.querySelectorAll('.theme-accent-text');
             dynamicAccents.forEach(el => {
                 el.style.color = config.primary;
             });
         };
 
-        // --- GLOBAL VARIABLES & DATA MODELS ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hype-quiz-app-v2';
+        // --- GLOBAL CONSTANTS ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hype-quiz-engine-v3';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "",
             authDomain: "mock-domain.firebaseapp.com",
@@ -499,24 +547,24 @@
 
         let app, db, auth, currentUser = null;
 
-        // Central state of application
+        // Unified State Controller
         const state = {
             currentView: 'auth',
             isOnline: navigator.onLine,
             quizzes: [],
             results: [],
-            myResults: [],
             activeQuiz: null,
             activeResult: null,
+            userRole: 'admin', // admin, student
             // builder state
             builderQuestions: [],
             builderTheme: 'hype',
             builderSettings: {
-                title: 'Hype Core Challenge',
-                description: 'Unified visual logistical metrics checking configuration.',
-                instructions: 'Ensure full environmental concentration inside the secure proctor view.',
+                title: 'Hype System Log',
+                description: 'Standard diagnostic evaluation parameters.',
+                instructions: 'Ensure full environment layout control inside the proctor frame.',
                 language: 'en',
-                category: 'Corporate',
+                category: 'Corporate Informatics',
                 passingScore: 50,
                 pointsPerQuestion: 1,
                 penaltyPoints: 0,
@@ -549,11 +597,9 @@
             playerTimeLeft: 0,
             playerWarnings: 0,
             playerStarted: false,
-            // is playing from direct link
             directQuizId: null
         };
 
-        // --- CUSTOM MODAL HANDLER ---
         const showModal = (title, message, iconType = 'alert') => {
             const modal = document.getElementById('hype-modal');
             const mTitle = document.getElementById('modal-title');
@@ -585,54 +631,28 @@
 
         document.getElementById('btn-modal-dismiss').addEventListener('click', dismissModal);
 
-        // --- STREAMING_CHUNK: Initializing Firebase and Auth Gateways... ---
-        // Initialize Firebase
+        // --- FIREBASE SECURITY INITIALIZATION ---
         const initFirebase = async () => {
             try {
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Check for custom token, otherwise use anonymous sign-in
                 if (customAuthToken) {
                     await signInWithCustomToken(auth, customAuthToken);
                 } else {
                     await signInAnonymously(auth);
                 }
 
+                // RULE 3 - Guard operations with auth state changes
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         currentUser = user;
                         document.getElementById('user-profile').classList.remove('hidden');
-                        document.getElementById('nav-username').textContent = user.isAnonymous ? 'Guest Architect' : (user.displayName || user.email);
+                        document.getElementById('nav-username').textContent = user.isAnonymous ? 'Guest Candidate' : (user.displayName || user.email);
                         
-                        // Real-time listener for Quizzes (RULE 1 Strict Path: /artifacts/{appId}/public/data/quizzes)
-                        const quizQuery = collection(db, 'artifacts', appId, 'public', 'data', 'quizzes');
-                        onSnapshot(quizQuery, (snapshot) => {
-                            state.quizzes = [];
-                            snapshot.forEach(doc => {
-                                state.quizzes.push({ id: doc.id, ...doc.data() });
-                            });
-                            renderQuizList();
-                            
-                            // Check if a direct share query string exists
-                            handleShareQuery();
-                        }, (error) => {
-                            console.error("Firestore loading error:", error);
-                        });
-
-                        // Real-time listener for Results (RULE 1 Strict Path: /artifacts/{appId}/public/data/results)
-                        const resultsQuery = collection(db, 'artifacts', appId, 'public', 'data', 'results');
-                        onSnapshot(resultsQuery, (snapshot) => {
-                            state.results = [];
-                            snapshot.forEach(doc => {
-                                state.results.push({ id: doc.id, ...doc.data() });
-                            });
-                            renderResultsList();
-                        }, (error) => {
-                            console.error("Firestore loading error:", error);
-                        });
-
+                        // Set listeners for active data sync
+                        syncDataLedgers();
                     } else {
                         currentUser = null;
                         document.getElementById('user-profile').classList.add('hidden');
@@ -640,16 +660,47 @@
                 });
             } catch (e) {
                 console.error("Firebase startup failed: ", e);
-                showModal("Database Offline", "Unable to establish an online connection to Firestore databases. Working locally in sandbox.", "alert");
+                showModal("Connection Localized", "Unable to establish active Firestore server routes. Running locally in simulated offline mode.", "alert");
             }
         };
 
-        // Network check listener
+        const syncDataLedgers = () => {
+            if (!currentUser) return;
+
+            // RULE 1 Strict path structure: /artifacts/{appId}/public/data/quizzes
+            const quizQuery = collection(db, 'artifacts', appId, 'public', 'data', 'quizzes');
+            onSnapshot(quizQuery, (snapshot) => {
+                state.quizzes = [];
+                snapshot.forEach(doc => {
+                    state.quizzes.push({ id: doc.id, ...doc.data() });
+                });
+                renderQuizList();
+                
+                // Route directly from url params if present
+                handleShareQuery();
+            }, (error) => {
+                console.error("Quizzes loading error:", error);
+            });
+
+            // RULE 1 Strict path structure: /artifacts/{appId}/public/data/results
+            const resultsQuery = collection(db, 'artifacts', appId, 'public', 'data', 'results');
+            onSnapshot(resultsQuery, (snapshot) => {
+                state.results = [];
+                snapshot.forEach(doc => {
+                    state.results.push({ id: doc.id, ...doc.data() });
+                });
+                renderResultsList();
+            }, (error) => {
+                console.error("Results loading error:", error);
+            });
+        };
+
+        // Network State Sync Badges
         window.addEventListener('online', () => {
             state.isOnline = true;
             const badge = document.getElementById('network-badge');
             badge.className = "flex items-center text-sm font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-100";
-            badge.querySelector('span').textContent = "Cloud Synced";
+            badge.querySelector('span').textContent = "Database Synced";
             badge.querySelector('i').setAttribute('data-lucide', 'wifi');
             lucide.createIcons();
         });
@@ -658,69 +709,86 @@
             state.isOnline = false;
             const badge = document.getElementById('network-badge');
             badge.className = "flex items-center text-sm font-semibold text-red-500 bg-red-50 px-3 py-1.5 rounded-full border border-red-100";
-            badge.querySelector('span').textContent = "Offline Storage";
+            badge.querySelector('span').textContent = "Offline Session Queue";
             badge.querySelector('i').setAttribute('data-lucide', 'wifi-off');
             lucide.createIcons();
         });
 
 
-        // --- STREAMING_CHUNK: Separation logic of Auth Screen... ---
         let isSignUpMode = true;
-        const toggleAuthMode = () => {
-            isSignUpMode = !isSignUpMode;
-            const header = document.getElementById('auth-header');
-            const sub = document.getElementById('auth-subheader');
-            const nameGrp = document.getElementById('group-name');
-            const toggleBtn = document.getElementById('btn-toggle-auth');
 
-            if (isSignUpMode) {
-                header.textContent = "Create Account";
-                sub.textContent = "Join the cloud assessment workspace.";
-                nameGrp.classList.remove('hidden');
+        const setAuthMode = (signUp) => {
+            isSignUpMode = signUp;
+            const nameField = document.getElementById('auth-field-name');
+            const roleField = document.getElementById('auth-field-role');
+            const tabLogin = document.getElementById('tab-auth-login');
+            const tabRegister = document.getElementById('tab-auth-register');
+
+            if (signUp) {
+                nameField.classList.remove('hidden');
+                roleField.classList.remove('hidden');
                 document.getElementById('auth-name').required = true;
-                toggleBtn.textContent = "Already have an account? Sign In";
+                tabRegister.className = "flex-grow text-center py-2 font-bold border-b-2 border-b-green-500 text-green-600 transition";
+                tabLogin.className = "flex-grow text-center py-2 font-bold text-gray-400 hover:text-gray-800 transition";
             } else {
-                header.textContent = "Sign In Workspace";
-                sub.textContent = "Welcome back, Operator.";
-                nameGrp.classList.add('hidden');
+                nameField.classList.add('hidden');
+                roleField.classList.add('hidden');
                 document.getElementById('auth-name').required = false;
-                toggleBtn.textContent = "Need an account? Sign Up";
+                tabLogin.className = "flex-grow text-center py-2 font-bold border-b-2 border-b-green-500 text-green-600 transition";
+                tabRegister.className = "flex-grow text-center py-2 font-bold text-gray-400 hover:text-gray-800 transition";
             }
         };
-        document.getElementById('btn-toggle-auth').addEventListener('click', toggleAuthMode);
+
+        document.getElementById('tab-auth-login').addEventListener('click', () => setAuthMode(false));
+        document.getElementById('tab-auth-register').addEventListener('click', () => setAuthMode(true));
 
         const handleAuthSubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value;
+            const chosenRole = document.querySelector('input[name="auth-role"]:checked').value;
 
-            // Simple Auth layer simulated on top of Anonymous Auth to bypass restrictions
-            // Saving local operators inside /artifacts/{appId}/users/{userId}/profile
             if (currentUser) {
+                // RULE 1 Strict User path: /artifacts/{appId}/users/{userId}/profile
                 const userRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'details');
-                await setDoc(userRef, {
+                const registrationData = {
                     name: isSignUpMode ? name : 'Hype Admin',
                     email: email,
-                    password: password, // simplified hashing mock
-                    isSignedUp: true
-                });
-                state.isSignedUp = true;
-                state.username = isSignUpMode ? name : 'Hype Admin';
-                document.getElementById('nav-username').textContent = state.username;
-                showModal("Access Granted", "Logged in successfully to operational cloud cockpit.", "success");
+                    role: isSignUpMode ? chosenRole : 'admin',
+                    updatedAt: new Date().toISOString()
+                };
+
+                await setDoc(userRef, registrationData);
+                state.userRole = registrationData.role;
+                
+                document.getElementById('nav-username').textContent = registrationData.name;
+                document.getElementById('nav-user-role').textContent = registrationData.role === 'admin' ? 'Workspace Administrator' : 'Candidate Workspace';
+
+                // Display targeted portal views matching FlexiQuiz roles
+                if (state.userRole === 'admin') {
+                    document.getElementById('dashboard-admin-view').classList.remove('hidden');
+                    document.getElementById('dashboard-student-view').classList.add('hidden');
+                    document.getElementById('btn-create-quiz').classList.remove('hidden');
+                } else {
+                    document.getElementById('dashboard-admin-view').classList.add('hidden');
+                    document.getElementById('dashboard-student-view').classList.remove('hidden');
+                    document.getElementById('btn-create-quiz').classList.add('hidden');
+                }
+
+                showModal("Access Approved", "Welcome to Hype workspace.", "success");
                 transitionView('dashboard');
             }
         };
+
         document.getElementById('auth-form').addEventListener('submit', handleAuthSubmit);
 
         document.getElementById('btn-logout').addEventListener('click', () => {
-            applySystemTheme('hype'); // reset theme on logout
+            applySystemTheme('hype');
             transitionView('auth');
         });
 
 
-        // --- STREAMING_CHUNK: Managing view transitions and state configs... ---
         const transitionView = (targetView) => {
             const views = ['view-auth', 'view-dashboard', 'view-builder', 'view-player', 'view-results'];
             views.forEach(v => document.getElementById(v).classList.add('hidden'));
@@ -730,7 +798,6 @@
             lucide.createIcons();
         };
 
-        // Navigation actions
         document.getElementById('btn-create-quiz').addEventListener('click', () => {
             state.builderQuestions = [];
             state.builderSettings = { ...INITIAL_SETTINGS };
@@ -746,13 +813,12 @@
         });
 
 
-        // --- STREAMING_CHUNK: Generating visual themes and settings arrays... ---
         const INITIAL_SETTINGS = {
             title: 'Hype System Log',
-            description: 'Standard technical diagnostic assessment',
-            instructions: 'Ensure full environmental focus in the workspace.',
+            description: 'Standard diagnostic evaluation parameters',
+            instructions: 'Ensure full environment layout control inside the proctor frame.',
             language: 'en',
-            category: 'System Diagnostics',
+            category: 'Corporate Informatics',
             passingScore: 50,
             pointsPerQuestion: 1,
             penaltyPoints: 0,
@@ -780,7 +846,6 @@
             showCorrectAnswers: true
         };
 
-        // Render the selectable visual themes inside settings pane
         const renderThemePresets = () => {
             const grid = document.getElementById('theme-grid');
             grid.innerHTML = '';
@@ -788,9 +853,8 @@
             Object.keys(THEME_PRESETS).forEach(themeKey => {
                 const config = THEME_PRESETS[themeKey];
                 const card = document.createElement('div');
-                card.className = `p-4 rounded-xl border-2 cursor-pointer transition flex flex-col items-center text-center space-y-2 hover:scale-105 ${state.builderTheme === themeKey ? 'border-indigo-600 bg-indigo-50/50' : 'border-gray-200 bg-white'}`;
+                card.className = `p-4 rounded-xl border-2 cursor-pointer transition flex flex-col items-center text-center space-y-2 hover:scale-105 ${state.builderTheme === themeKey ? 'border-green-500 bg-green-50/20' : 'border-gray-200 bg-white'}`;
                 
-                // Color circle indicator
                 const circle = document.createElement('div');
                 circle.className = "w-8 h-8 rounded-full border border-white shadow";
                 circle.style.background = config.gradient;
@@ -817,42 +881,42 @@
 
             const settingsConfig = [
                 { grp: "1. Global Metadata", items: [
-                    { name: 'title', label: '1. Title', type: 'text' },
-                    { name: 'description', label: '2. Description', type: 'text' },
-                    { name: 'instructions', label: '3. Instructions', type: 'text' },
-                    { name: 'language', label: '4. Locale Language', type: 'text' },
-                    { name: 'category', label: '5. Segment Category', type: 'text' }
+                    { name: 'title', label: '1. Title Template', type: 'text' },
+                    { name: 'description', label: '2. Brief Description', type: 'text' },
+                    { name: 'instructions', label: '3. Guidelines', type: 'text' },
+                    { name: 'language', label: '4. ISO Language Code', type: 'text' },
+                    { name: 'category', label: '5. Segment Area', type: 'text' }
                 ]},
                 { grp: "2. Grade Algorithms", items: [
-                    { name: 'passingScore', label: '6. Minimum Passing Score (%)', type: 'number' },
-                    { name: 'pointsPerQuestion', label: '7. Points Per Node', type: 'number' },
-                    { name: 'penaltyPoints', label: '8. Penalty Points', type: 'number' },
-                    { name: 'partialCredit', label: '9. Partial Scoring', type: 'checkbox' },
-                    { name: 'gradeFormat', label: '10. Analytics Format', type: 'select', options: ['percentage', 'points'] }
+                    { name: 'passingScore', label: '6. Minimum Passing (%)', type: 'number' },
+                    { name: 'pointsPerQuestion', label: '7. Scale Points Per Node', type: 'number' },
+                    { name: 'penaltyPoints', label: '8. Negative Marking Rate', type: 'number' },
+                    { name: 'partialCredit', label: '9. Allow Partial Credit', type: 'checkbox' },
+                    { name: 'gradeFormat', label: '10. Grade Format', type: 'select', options: ['percentage', 'points'] }
                 ]},
                 { grp: "3. Gatekeeping Controls", items: [
-                    { name: 'startDate', label: '11. Activation Date', type: 'datetime' },
-                    { name: 'endDate', label: '12. Deactivation Date', type: 'datetime' },
-                    { name: 'maxAttempts', label: '13. Limit Access Attempts', type: 'number' },
-                    { name: 'password', label: '14. Access Key Passphrase', type: 'text' },
-                    { name: 'requireLogin', label: '15. Login Gatekeeping', type: 'checkbox' },
-                    { name: 'ipRestriction', label: '16. Network Constraints (CSV)', type: 'text' },
-                    { name: 'offlineSync', label: '17. Synced Offline Support', type: 'checkbox' }
+                    { name: 'startDate', label: '11. Starting Validity', type: 'datetime' },
+                    { name: 'endDate', label: '12. Ending Validity', type: 'datetime' },
+                    { name: 'maxAttempts', label: '13. Attempt Bounds', type: 'number' },
+                    { name: 'password', label: '14. Access Passphrase', type: 'text' },
+                    { name: 'requireLogin', label: '15. Require Account Sign In', type: 'checkbox' },
+                    { name: 'ipRestriction', label: '16. Network Whitelist IPs', type: 'text' },
+                    { name: 'offlineSync', label: '17. Enable Offline Cues', type: 'checkbox' }
                 ]},
                 { grp: "4. Proctoring Protocol", items: [
-                    { name: 'enableFullscreen', label: '18. Force Fullscreen Mode', type: 'checkbox' },
-                    { name: 'preventTabSwitch', label: '19. Intercept Tab Switching', type: 'checkbox' },
-                    { name: 'disableCopyPaste', label: '20. Lockdown Clipboard Action', type: 'checkbox' },
+                    { name: 'enableFullscreen', label: '18. Force Fullscreen Frame', type: 'checkbox' },
+                    { name: 'preventTabSwitch', label: '19. Intercept Unfocus/Blur', type: 'checkbox' },
+                    { name: 'disableCopyPaste', label: '20. Lockdown Clipboard Hooks', type: 'checkbox' },
                     { name: 'requireWebcam', label: '21. Active Webcam Monitoring', type: 'checkbox' },
-                    { name: 'captureScreen', label: '22. Capture System Screen', type: 'checkbox' },
-                    { name: 'timeLimitMinutes', label: '23. Hard Timer Bound (Min)', type: 'number' }
+                    { name: 'captureScreen', label: '22. Secure Screen Tracking', type: 'checkbox' },
+                    { name: 'timeLimitMinutes', label: '23. High Resolution Timer (Min)', type: 'number' }
                 ]},
                 { grp: "5. Examination Engine Flow", items: [
-                    { name: 'questionsPerPage', label: '24. Page Density (Nodes)', type: 'number' },
-                    { name: 'randomizeQuestions', label: '25. Scramble Node Order', type: 'checkbox' },
-                    { name: 'randomizeAnswers', label: '26. Scramble Choice Items', type: 'checkbox' },
-                    { name: 'allowBackButton', label: '27. Backward Node Navigation', type: 'checkbox' },
-                    { name: 'showProgressBar', label: '28. Display Flow Progress', type: 'checkbox' }
+                    { name: 'questionsPerPage', label: '24. Visual Page Density', type: 'number' },
+                    { name: 'randomizeQuestions', label: '25. Shuffle Question Order', type: 'checkbox' },
+                    { name: 'randomizeAnswers', label: '26. Shuffle Option Lists', type: 'checkbox' },
+                    { name: 'allowBackButton', label: '27. Backward Navigation', type: 'checkbox' },
+                    { name: 'showProgressBar', label: '28. Display Flow Progress Bar', type: 'checkbox' }
                 ]},
                 { grp: "6. Instant Feedback Logic", items: [
                     { name: 'showScoreImmediately', label: '29. Reveal Score Instantly', type: 'checkbox' },
@@ -868,7 +932,7 @@
 
                 section.items.forEach(item => {
                     const card = document.createElement('div');
-                    card.className = "bg-white p-4 rounded-xl border border-gray-100 flex flex-col justify-between space-y-2";
+                    card.className = "bg-white p-4 rounded-xl border border-gray-100 flex flex-col justify-between space-y-2 shadow-sm";
                     
                     const label = document.createElement('label');
                     label.className = "text-xs font-bold text-gray-500 uppercase tracking-wider";
@@ -879,10 +943,10 @@
                     const val = state.builderSettings[item.name] !== undefined ? state.builderSettings[item.name] : '';
 
                     if (item.type === 'checkbox') {
-                        card.className = "bg-white p-4 rounded-xl border border-gray-100 flex flex-row items-center justify-between cursor-pointer hover:bg-slate-50";
+                        card.className = "bg-white p-4 rounded-xl border border-gray-100 flex flex-row items-center justify-between cursor-pointer hover:bg-slate-50 shadow-sm";
                         input = document.createElement('input');
                         input.type = 'checkbox';
-                        input.className = "w-5 h-5 rounded accent-[#00b30f] cursor-pointer";
+                        input.className = "w-5 h-5 rounded accent-green-600 cursor-pointer";
                         input.checked = !!val;
                         input.addEventListener('change', (e) => {
                             state.builderSettings[item.name] = e.target.checked;
@@ -917,31 +981,31 @@
             });
         };
 
-        // --- STREAMING_CHUNK: Architecture of 12 Interactive Question Types and Answers... ---
+
         const addBuilderQuestion = (type) => {
             const newQ = {
                 id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                 type: type,
-                text: 'New node assessment question parameter',
+                text: 'New question entry title description',
                 options: ['Choice 1', 'Choice 2'],
-                correctAnswer: 'Choice 1', // default template correct selection
+                correctAnswer: 'Choice 1',
                 points: state.builderSettings.pointsPerQuestion || 1
             };
 
-            // Custom setup for standard types
+            // Custom adjustments per question types
             if (type === 'Checkboxes') {
-                newQ.correctAnswer = ['Choice 1']; // correct answers array
+                newQ.correctAnswer = ['Choice 1'];
             } else if (type === 'True/False') {
                 newQ.options = ['True', 'False'];
                 newQ.correctAnswer = 'True';
             } else if (type === 'Short Answer' || type === 'Fill in Blank' || type === 'Numeric') {
-                newQ.correctAnswer = 'Correct Expected Key Value';
+                newQ.correctAnswer = 'Expected Answer';
             } else if (type === 'Date') {
                 newQ.correctAnswer = '2026-06-09';
             } else if (type === 'Likert Scale') {
                 newQ.correctAnswer = '5';
             } else if (type === 'Matching') {
-                newQ.correctAnswer = 'PairA-Pair1, PairB-Pair2';
+                newQ.correctAnswer = 'Pair1-Item1, Pair2-Item2';
             } else if (type === 'Ordering') {
                 newQ.correctAnswer = '1, 2, 3';
             }
@@ -964,7 +1028,6 @@
             renderBuilderQuestions();
         };
 
-        // Render builders with inline correct answer options
         const renderBuilderQuestions = () => {
             const container = document.getElementById('questions-workspace');
             container.innerHTML = '';
@@ -973,7 +1036,7 @@
                 container.innerHTML = `
                     <div class="text-center py-16 border-2 border-dashed border-gray-200 rounded-xl bg-white p-6">
                         <i data-lucide="help-circle" class="w-12 h-12 text-gray-300 mx-auto mb-3"></i>
-                        <p class="text-gray-400 text-sm font-medium">Add an assessment node using the side toolbar to begin constructing your logic.</p>
+                        <p class="text-gray-400 text-sm font-medium">Add questions using the sidebar parameters to populate the active assessment framework.</p>
                     </div>
                 `;
                 lucide.createIcons();
@@ -984,7 +1047,7 @@
                 const card = document.createElement('div');
                 card.className = "bg-white border border-gray-200 rounded-xl shadow-sm p-6 relative flex flex-col space-y-4 animate-fade-in";
 
-                // Header
+                // Card Header
                 const head = document.createElement('div');
                 head.className = "flex justify-between items-center";
                 head.innerHTML = `
@@ -1001,16 +1064,16 @@
                 head.appendChild(delBtn);
                 card.appendChild(head);
 
-                // Prompt Question Input
+                // Main Prompt Description Input
                 const qText = document.createElement('input');
                 qText.type = "text";
                 qText.value = q.text;
                 qText.className = "w-full text-lg font-bold border-b border-gray-200 py-2 outline-none focus:border-green-500 transition";
-                qText.placeholder = "Enter question description...";
+                qText.placeholder = "Enter question text description...";
                 qText.addEventListener('input', (e) => updateBuilderQuestion(q.id, 'text', e.target.value));
                 card.appendChild(qText);
 
-                // Nodes Options and Answer Settings Specific Area
+                // Option Editor Wrapper
                 const subNode = document.createElement('div');
                 subNode.className = "pl-4 border-l-2 border-gray-100 py-1 space-y-3";
 
@@ -1021,14 +1084,12 @@
                         const row = document.createElement('div');
                         row.className = "flex items-center space-x-2";
                         
-                        // Radio selector representing correct answer
-                        const isCorrect = q.correctAnswer === opt;
                         const indicator = document.createElement('input');
                         indicator.type = 'radio';
                         indicator.name = `correct-${q.id}`;
-                        indicator.checked = isCorrect;
+                        indicator.checked = q.correctAnswer === opt;
                         indicator.className = "w-4 h-4 rounded-full border border-gray-300 flex-shrink-0 accent-green-600";
-                        indicator.title = "Mark as Correct Answer";
+                        indicator.title = "Mark as Correct Choice";
                         indicator.addEventListener('change', () => {
                             updateBuilderQuestion(q.id, 'correctAnswer', opt);
                         });
@@ -1064,7 +1125,7 @@
 
                     const addOptBtn = document.createElement('button');
                     addOptBtn.className = "text-xs font-bold text-[#008cff] hover:text-[#00b30f] flex items-center transition";
-                    addOptBtn.innerHTML = '<i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i> Add Selection Choice';
+                    addOptBtn.innerHTML = '<i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i> Add Choice Option';
                     addOptBtn.addEventListener('click', () => {
                         updateBuilderQuestion(q.id, 'options', [...q.options, `Choice ${q.options.length + 1}`]);
                         renderBuilderQuestions();
@@ -1073,10 +1134,9 @@
                     subNode.appendChild(optContainer);
                     subNode.appendChild(addOptBtn);
 
-                    // Show selected correct answer summary
                     const status = document.createElement('div');
                     status.className = "text-xs font-semibold text-green-600 bg-green-50 p-2 rounded flex items-center";
-                    status.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1"></i> Correct Answer Set: <strong>&nbsp;${q.correctAnswer}</strong>`;
+                    status.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1"></i> Correct Answer Configured: <strong>&nbsp;${q.correctAnswer}</strong>`;
                     subNode.appendChild(status);
 
                 } else if (q.type === 'Checkboxes') {
@@ -1086,14 +1146,12 @@
                         const row = document.createElement('div');
                         row.className = "flex items-center space-x-2";
                         
-                        // Checkbox selector representing correct answer values
                         const correctArray = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
-                        const isCorrect = correctArray.includes(opt);
                         const indicator = document.createElement('input');
                         indicator.type = 'checkbox';
-                        indicator.checked = isCorrect;
+                        indicator.checked = correctArray.includes(opt);
                         indicator.className = "w-4 h-4 rounded border border-gray-300 flex-shrink-0 accent-green-600";
-                        indicator.title = "Mark as Correct Answer";
+                        indicator.title = "Mark as Correct Choice";
                         indicator.addEventListener('change', (e) => {
                             let updatedCorrect;
                             if (e.target.checked) {
@@ -1115,7 +1173,6 @@
                             newOpts[oIdx] = e.target.value;
                             updateBuilderQuestion(q.id, 'options', newOpts);
                             
-                            // Adjust correct answer tags
                             const curCorrect = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
                             const nextCorrect = curCorrect.map(c => c === oldVal ? e.target.value : c);
                             updateBuilderQuestion(q.id, 'correctAnswer', nextCorrect);
@@ -1137,7 +1194,7 @@
 
                     const addOptBtn = document.createElement('button');
                     addOptBtn.className = "text-xs font-bold text-[#008cff] hover:text-[#00b30f] flex items-center transition";
-                    addOptBtn.innerHTML = '<i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i> Add Checkbox Choice';
+                    addOptBtn.innerHTML = '<i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i> Add Checkbox Selection';
                     addOptBtn.addEventListener('click', () => {
                         updateBuilderQuestion(q.id, 'options', [...q.options, `Choice ${q.options.length + 1}`]);
                         renderBuilderQuestions();
@@ -1149,7 +1206,7 @@
                     const status = document.createElement('div');
                     status.className = "text-xs font-semibold text-green-600 bg-green-50 p-2 rounded flex items-center";
                     const listText = (Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer]).join(', ');
-                    status.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1"></i> Correct Answers: <strong>&nbsp;${listText || 'None selected'}</strong>`;
+                    status.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1"></i> Correct Checks Configured: <strong>&nbsp;${listText || 'None chosen'}</strong>`;
                     subNode.appendChild(status);
 
                 } else if (q.type === 'True/False') {
@@ -1170,13 +1227,13 @@
                 } else if (q.type === 'Short Answer' || q.type === 'Fill in Blank' || q.type === 'Numeric') {
                     const label = document.createElement('span');
                     label.className = "text-[10px] font-bold text-gray-400 uppercase tracking-widest block";
-                    label.textContent = "Expected Correct Answer Value:";
+                    label.textContent = "Specify Exact Expected Answer Value:";
                     subNode.appendChild(label);
 
                     const ansInput = document.createElement('input');
                     ansInput.type = q.type === 'Numeric' ? 'number' : 'text';
                     ansInput.className = "w-full p-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-green-500 bg-gray-50/50";
-                    ansInput.placeholder = "Enter expected exact string/number...";
+                    ansInput.placeholder = "Enter exact string/numeric response...";
                     ansInput.value = q.correctAnswer || '';
                     ansInput.addEventListener('input', (e) => {
                         updateBuilderQuestion(q.id, 'correctAnswer', e.target.value);
@@ -1186,16 +1243,15 @@
                 } else if (q.type === 'Essay') {
                     subNode.innerHTML = `
                         <div class="w-full h-16 border border-dashed border-gray-200 bg-gray-50/50 rounded-lg p-2 text-[10px] font-semibold text-gray-400 leading-relaxed uppercase flex items-center justify-center">
-                            Essay Text Zone (Evaluation logic sets manual grading standard)
+                            Candidate Essay Sandbox (Evaluation engine requires manual reviewer feedback validation)
                         </div>
                     `;
-                    // Grader always grants compliance check for submission demo
                     updateBuilderQuestion(q.id, 'correctAnswer', '(Manually graded essay entry)');
 
                 } else if (q.type === 'Matching') {
                     const label = document.createElement('span');
                     label.className = "text-[10px] font-bold text-gray-400 uppercase tracking-widest block";
-                    label.textContent = "Specify matching keys (Format: LeftKey-RightKey, Left2-Right2):";
+                    label.textContent = "Specify comma-separated pairing matches (Format: KeyA-ItemA, KeyB-ItemB):";
                     subNode.appendChild(label);
 
                     const ansInput = document.createElement('input');
@@ -1210,7 +1266,7 @@
                 } else if (q.type === 'Ordering') {
                     const label = document.createElement('span');
                     label.className = "text-[10px] font-bold text-gray-400 uppercase tracking-widest block";
-                    label.textContent = "Specify standard correct sort index keys (comma separated list):";
+                    label.textContent = "Specify correct index values comma-separated (Format: 1, 2, 3, 4):";
                     subNode.appendChild(label);
 
                     const ansInput = document.createElement('input');
@@ -1222,14 +1278,14 @@
                     });
                     subNode.appendChild(ansInput);
 
-                } else if (q.type === 'Numeric' || q.type === 'Date') {
+                } else if (q.type === 'Date') {
                     const label = document.createElement('span');
                     label.className = "text-[10px] font-bold text-gray-400 uppercase tracking-widest block";
-                    label.textContent = "Set Standard Correct Date Range Node:";
+                    label.textContent = "Select Targeted Correct Date Evaluation:";
                     subNode.appendChild(label);
 
                     const ansInput = document.createElement('input');
-                    ansInput.type = q.type === 'Date' ? 'date' : 'number';
+                    ansInput.type = 'date';
                     ansInput.className = "p-2 border border-gray-200 rounded-lg text-sm bg-gray-50/50";
                     ansInput.value = q.correctAnswer || '';
                     ansInput.addEventListener('input', (e) => {
@@ -1240,7 +1296,7 @@
                 } else if (q.type === 'Likert Scale') {
                     const label = document.createElement('span');
                     label.className = "text-[10px] font-bold text-gray-400 uppercase tracking-widest block";
-                    label.textContent = "Set Target Choice Preference value (1 to 5 scale):";
+                    label.textContent = "Set Standard Correct Selection Weight Preference (1 to 5):";
                     subNode.appendChild(label);
 
                     const ansInput = document.createElement('input');
@@ -1257,7 +1313,7 @@
                 } else if (q.type === 'File Upload') {
                     subNode.innerHTML = `
                         <div class="w-full h-12 border border-dashed border-gray-200 bg-gray-50/50 rounded-lg text-[10px] font-semibold text-gray-400 uppercase flex items-center justify-center">
-                            Secure upload file space template (Manually Graded)
+                            Attachment File Sandbox Slot (Grading evaluates complete files)
                         </div>
                     `;
                     updateBuilderQuestion(q.id, 'correctAnswer', '(Uploaded Response File)');
@@ -1265,13 +1321,13 @@
 
                 card.appendChild(subNode);
 
-                // Footer settings of question
+                // Footer Points Weighting
                 const foot = document.createElement('div');
                 foot.className = "flex justify-end pt-3 border-t border-gray-100";
                 
                 const pointsLabel = document.createElement('label');
                 pointsLabel.className = "text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center";
-                pointsLabel.innerHTML = 'Value points: ';
+                pointsLabel.innerHTML = 'Value Points: ';
                 
                 const pointsInput = document.createElement('input');
                 pointsInput.type = "number";
@@ -1289,7 +1345,6 @@
             lucide.createIcons();
         };
 
-        // Initialize Builder Toolbars
         const initBuilderToolbars = () => {
             const types = QUESTION_TYPES;
             const destDesktop = document.getElementById('toolbar-question-types');
@@ -1319,80 +1374,75 @@
         ];
 
 
-        // --- STREAMING_CHUNK: Architecting Tab Navigation in Builder view... ---
         document.getElementById('tab-questions').addEventListener('click', () => {
             document.getElementById('pane-questions').classList.remove('hidden');
             document.getElementById('pane-settings').classList.add('hidden');
-            document.getElementById('tab-questions').className = "flex-1 py-4 font-bold text-sm tracking-wide text-center border-b-2 border-b-[#00b30f] theme-accent-text";
-            document.getElementById('tab-settings').className = "flex-1 py-4 font-bold text-sm tracking-wide text-center border-b-2 border-b-transparent text-gray-400 hover:text-gray-600";
+            document.getElementById('tab-questions').className = "flex-1 py-4 font-bold text-sm text-center border-b-2 border-b-green-500 text-green-500";
+            document.getElementById('tab-settings').className = "flex-1 py-4 font-bold text-sm text-center border-b-2 border-b-transparent text-gray-400 hover:text-gray-600";
         });
 
         document.getElementById('tab-settings').addEventListener('click', () => {
             document.getElementById('pane-questions').classList.add('hidden');
             document.getElementById('pane-settings').classList.remove('hidden');
-            document.getElementById('tab-settings').className = "flex-1 py-4 font-bold text-sm tracking-wide text-center border-b-2 border-b-[#00b30f] theme-accent-text";
-            document.getElementById('tab-questions').className = "flex-1 py-4 font-bold text-sm tracking-wide text-center border-b-2 border-b-transparent text-gray-400 hover:text-gray-600";
+            document.getElementById('tab-settings').className = "flex-1 py-4 font-bold text-sm text-center border-b-2 border-b-green-500 text-green-500";
+            document.getElementById('tab-questions').className = "flex-1 py-4 font-bold text-sm text-center border-b-2 border-b-transparent text-gray-400 hover:text-gray-600";
             renderThemePresets();
             render30Settings();
         });
 
 
-        // --- STREAMING_CHUNK: Syncing quiz models and direct playing links... ---
         document.getElementById('btn-builder-save').addEventListener('click', async () => {
             if (state.builderQuestions.length === 0) {
-                showModal("Validation Blocked", "Please allocate at least one assessment question node first.", "alert");
+                showModal("Validation Error", "Please create at least one question node before publishing.", "alert");
                 return;
             }
 
             try {
-                // Compile the assessment configuration payload
                 const payload = {
                     authorId: currentUser ? currentUser.uid : 'system',
                     settings: state.builderSettings,
                     questions: state.builderQuestions,
-                    theme: state.builderTheme, // Store chosen theme key
+                    theme: state.builderTheme,
                     createdAt: new Date().toISOString()
                 };
 
-                // Save directly to strict path structure (RULE 1 Strict Path: /artifacts/{appId}/public/data/quizzes)
+                // RULE 1 Strict Path: /artifacts/{appId}/public/data/quizzes
                 const targetRef = collection(db, 'artifacts', appId, 'public', 'data', 'quizzes');
                 await addDoc(targetRef, payload);
 
-                applySystemTheme('hype'); // clear back to standard dashboard theme
-                showModal("Assessment Synced", "Successfully validated assessment and published to global cloud directory.", "success");
+                applySystemTheme('hype');
+                showModal("Quiz Published", "Assessment synced and generated live publish link on the dashboard successfully.", "success");
                 transitionView('dashboard');
             } catch (err) {
-                console.error("Save failure:", err);
-                showModal("Sync Disrupted", "Network synchronization encountered anomalies. Attempting local queue sync.", "alert");
+                console.error("Save error:", err);
+                showModal("Sync Fault", "Cloud integration interrupted. Attempts queued offline.", "alert");
             }
         });
 
 
-        // --- STREAMING_CHUNK: Dashboard rendering systems... ---
         const renderQuizList = () => {
             const container = document.getElementById('quiz-list-container');
             container.innerHTML = '';
 
             if (state.quizzes.length === 0) {
-                container.innerHTML = `<div class="text-center py-12 text-gray-400 italic">No quizzes designed yet. Let's make one!</div>`;
+                container.innerHTML = `<div class="text-center py-12 text-gray-400 italic bg-white rounded-xl border border-gray-100">No quizzes configured yet. Let's create one!</div>`;
                 return;
             }
 
             state.quizzes.forEach(quiz => {
                 const card = document.createElement('div');
-                card.className = "border border-gray-100 rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-md transition-all bg-white relative overflow-hidden";
+                card.className = "border border-gray-100 rounded-xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-md transition-all bg-white relative overflow-hidden shadow-sm";
                 
-                // Fetch name of theme if selected
                 const themeName = (THEME_PRESETS[quiz.theme] || THEME_PRESETS.hype).name;
 
                 card.innerHTML = `
                     <div class="space-y-1">
-                        <span class="text-[9px] font-black tracking-widest text-[#008cff] uppercase">${quiz.settings.category || 'Standard'} • Theme: ${themeName}</span>
+                        <span class="text-[9px] font-black tracking-widest text-[#008cff] uppercase bg-blue-50 px-2 py-0.5 rounded">${quiz.settings.category || 'General'} • Theme: ${themeName}</span>
                         <h4 class="font-extrabold text-lg text-gray-800">${quiz.settings.title}</h4>
                         <div class="flex flex-wrap gap-2 text-[10px] font-bold text-gray-400 uppercase">
-                            <span class="bg-gray-100 px-2 py-0.5 rounded">${quiz.questions.length} Nodes</span>
-                            <span class="bg-gray-100 px-2 py-0.5 rounded">Duration: ${quiz.settings.timeLimitMinutes} min</span>
-                            <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded">Proctor: ${quiz.settings.enableFullscreen ? 'Active' : 'Off'}</span>
+                            <span class="bg-gray-100 px-2 py-0.5 rounded">${quiz.questions.length} Questions</span>
+                            <span class="bg-gray-100 px-2 py-0.5 rounded">Limit: ${quiz.settings.timeLimitMinutes} min</span>
+                            <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded">Proctor: ${quiz.settings.enableFullscreen ? 'Locked' : 'Standard'}</span>
                         </div>
                     </div>
                 `;
@@ -1400,21 +1450,20 @@
                 const btnRow = document.createElement('div');
                 btnRow.className = "flex items-center space-x-2 w-full sm:w-auto justify-end";
 
-                // Play Button
+                // Play Attempt Button
                 const playBtn = document.createElement('button');
                 playBtn.className = "bg-[#008cff] hover:bg-blue-600 text-white p-3 rounded-xl shadow transition";
                 playBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i>';
                 playBtn.addEventListener('click', () => launchQuizPlayer(quiz));
                 btnRow.appendChild(playBtn);
 
-                // Publish/Share Link Button
+                // Publish & Link Copy Button
                 const shareBtn = document.createElement('button');
                 shareBtn.className = "bg-green-50 text-[#00b30f] hover:bg-green-100 p-3 rounded-xl shadow-sm transition";
                 shareBtn.innerHTML = '<i data-lucide="link" class="w-4 h-4"></i>';
                 shareBtn.addEventListener('click', () => {
                     const cleanUrl = window.location.origin + window.location.pathname + `?quizId=${quiz.id}`;
                     
-                    // Standard clipboard injection matching CSP system constraints
                     const inputTemp = document.createElement('input');
                     document.body.appendChild(inputTemp);
                     inputTemp.value = cleanUrl;
@@ -1422,7 +1471,7 @@
                     document.execCommand('copy');
                     document.body.removeChild(inputTemp);
 
-                    showModal("Link Copied", "Shareable Direct Assessment Link with Custom Theme embedded copied.", "success");
+                    showModal("Link Copied", "Shareable candidate direct url link with custom theme parameters copied.", "success");
                 });
                 btnRow.appendChild(shareBtn);
 
@@ -1438,38 +1487,36 @@
             container.innerHTML = '';
 
             if (state.results.length === 0) {
-                container.innerHTML = `<div class="text-center py-12 text-gray-400 italic">No metrics generated yet. Once a participant finishes, results populate instantly here.</div>`;
+                container.innerHTML = `<div class="text-center py-12 text-gray-400 italic bg-white rounded-xl border border-gray-100">No scorecards synced yet. Results populate instantly here.</div>`;
                 return;
             }
 
             state.results.forEach(res => {
                 const card = document.createElement('div');
-                card.className = "border border-gray-100 rounded-xl p-4 flex justify-between items-center hover:shadow-md transition bg-white";
+                card.className = "border border-gray-100 rounded-xl p-4 flex justify-between items-center hover:shadow-md transition bg-white shadow-sm";
                 
                 const percentage = Math.round((res.score / res.totalPoints) * 100);
                 const isPassed = percentage >= (res.passingScore || 50);
 
                 card.innerHTML = `
                     <div class="space-y-1">
-                        <span class="text-[9px] font-black tracking-widest ${isPassed ? 'text-green-500 bg-green-50' : 'text-red-500 bg-red-50'} px-2 py-0.5 rounded uppercase">
+                        <span class="text-[9px] font-black tracking-widest ${isPassed ? 'text-green-600 bg-green-50' : 'text-red-500 bg-red-50'} px-2 py-0.5 rounded uppercase font-semibold">
                             ${isPassed ? 'Passed' : 'Failed'}
                         </span>
                         <h4 class="font-extrabold text-sm text-gray-800">${res.quizTitle}</h4>
-                        <p class="text-xs text-gray-400">Respondent: <span class="font-bold text-gray-600">${res.userName || 'Anonymous'}</span></p>
+                        <p class="text-xs text-gray-400">Candidate: <span class="font-bold text-gray-600">${res.userName || 'Guest'}</span></p>
                     </div>
                     <div class="text-right">
                         <p class="text-lg font-black text-gray-800">${percentage}%</p>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase">Alerts logged: ${res.warnings}</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase">Proctor Warnings: ${res.warnings}</p>
                     </div>
                 `;
 
-                // Add Details View Button
                 const dBtn = document.createElement('button');
-                dBtn.className = "ml-4 text-xs font-bold text-[#008cff] hover:text-[#00b30f] transition";
+                dBtn.className = "ml-4 text-xs font-bold text-[#008cff] hover:underline transition";
                 dBtn.textContent = "Metrics";
                 dBtn.addEventListener('click', () => {
                     state.activeResult = res;
-                    // Find the quiz structure to load correct answers correctly if available
                     const matchedQuiz = state.quizzes.find(q => q.id === res.quizId);
                     renderMetricsPanel(matchedQuiz);
                     transitionView('results');
@@ -1482,8 +1529,19 @@
             lucide.createIcons();
         };
 
+        // Student Manual Access Code execution
+        document.getElementById('btn-student-go').addEventListener('click', () => {
+            const val = document.getElementById('student-quiz-code').value.trim();
+            if (!val) return;
+            const target = state.quizzes.find(q => q.id === val);
+            if (target) {
+                launchQuizPlayer(target);
+            } else {
+                showModal("Access Denied", "No quiz matches the provided system key.", "alert");
+            }
+        });
 
-        // --- STREAMING_CHUNK: Handle direct share routing system... ---
+
         const handleShareQuery = () => {
             const params = new URLSearchParams(window.location.search);
             const targetQuizId = params.get('quizId');
@@ -1493,13 +1551,12 @@
                 if (matches) {
                     launchQuizPlayer(matches);
                 } else {
-                    showModal("Invalid Link", "The link requested matches a quiz configuration no longer present in cloud sync.", "alert");
+                    showModal("Unavailable", "The shared link corresponds to an assessment that is no longer valid or active.", "alert");
                 }
             }
         };
 
 
-        // --- STREAMING_CHUNK: Securing the proctor canvas and launchers... ---
         const launchQuizPlayer = (quiz) => {
             state.activeQuiz = quiz;
             state.playerAnswers = {};
@@ -1507,16 +1564,14 @@
             state.playerWarnings = 0;
             state.playerStarted = false;
 
-            // Apply selected theme of the quiz
             applySystemTheme(quiz.theme || 'hype');
 
             document.getElementById('player-title').textContent = quiz.settings.title;
-            document.getElementById('player-desc').textContent = quiz.settings.description || 'Secure diagnostic environment.';
-            document.getElementById('player-meta-theme').textContent = `Selected Theme Layout: ${(THEME_PRESETS[quiz.theme] || THEME_PRESETS.hype).name}`;
-            document.getElementById('player-meta-time').innerHTML = `<i data-lucide="clock" class="w-4 h-4 inline mr-1 text-[#008cff]"></i> Duration Bounds: <strong>${quiz.settings.timeLimitMinutes} minutes</strong>`;
-            document.getElementById('player-meta-questions').innerHTML = `<i data-lucide="layers" class="w-4 h-4 inline mr-1 text-[#00b30f] theme-accent-text"></i> Assessment Dense Matrix: <strong>${quiz.questions.length} Node units</strong>`;
+            document.getElementById('player-desc').textContent = quiz.settings.description || 'Secure testing portal.';
+            document.getElementById('player-meta-theme').textContent = `Theme: ${(THEME_PRESETS[quiz.theme] || THEME_PRESETS.hype).name}`;
+            document.getElementById('player-meta-time').textContent = `Time Allowed: ${quiz.settings.timeLimitMinutes} minutes`;
+            document.getElementById('player-meta-questions').textContent = `Total Items: ${quiz.questions.length} Nodes`;
 
-            // Reset layouts
             document.getElementById('player-prestart').classList.remove('hidden');
             document.getElementById('player-canvas').classList.add('hidden');
 
@@ -1530,10 +1585,9 @@
 
             document.getElementById('player-prestart').classList.add('hidden');
             document.getElementById('player-canvas').classList.remove('hidden');
-
             document.getElementById('player-active-title').textContent = quiz.settings.title;
 
-            // Trigger Timer Node
+            // Timer Initialization
             if (quiz.settings.timeLimitMinutes > 0) {
                 document.getElementById('timer-hud').classList.remove('hidden');
                 triggerTimerProcess();
@@ -1541,22 +1595,22 @@
                 document.getElementById('timer-hud').classList.add('hidden');
             }
 
-            // Secure Lock 1: Direct Fullscreen binding
+            // PROCTOR LOCK 1: Force Fullscreen
             if (quiz.settings.enableFullscreen) {
                 requestFullscreenMode();
             }
 
-            // Secure Lock 2: webcam initialization
+            // PROCTOR LOCK 2: Webcam Frame
             if (quiz.settings.requireWebcam) {
                 initWebcamMonitor();
             }
 
-            // Secure Lock 3: Tab Switching hooks
+            // PROCTOR LOCK 3: Visibility Track
             if (quiz.settings.preventTabSwitch) {
                 document.addEventListener('visibilitychange', triggerVisibilityLock);
             }
 
-            // Secure Lock 4: Clipboard prevention
+            // PROCTOR LOCK 4: Clipboard Lockdown
             if (quiz.settings.disableCopyPaste) {
                 document.addEventListener('copy', preventContext);
                 document.addEventListener('paste', preventContext);
@@ -1568,7 +1622,7 @@
 
         document.getElementById('btn-player-begin').addEventListener('click', runSecureTestingEnvironment);
 
-        // --- STREAMING_CHUNK: Proctor security algorithms... ---
+
         let sessionTimerRef;
         const triggerTimerProcess = () => {
             if (sessionTimerRef) clearInterval(sessionTimerRef);
@@ -1576,7 +1630,7 @@
                 state.playerTimeLeft--;
                 if (state.playerTimeLeft <= 0) {
                     clearInterval(sessionTimerRef);
-                    showModal("Time Expired", "Session duration hit limits. Compiling metrics...", "alert");
+                    showModal("Time Expired", "Allocated session duration has concluded. Submission locked.", "alert");
                     terminateAndSubmitSession();
                 } else {
                     const mins = Math.floor(state.playerTimeLeft / 60);
@@ -1589,13 +1643,13 @@
         const triggerVisibilityLock = () => {
             if (document.hidden) {
                 state.playerWarnings++;
-                showModal("Security Violation", "Tab minimizing or context switching logged. This anomaly has been synchronized.", "alert");
+                showModal("Security Anomaly", "A focus switch or minimized window state was detected. Logged on active server audits.", "alert");
             }
         };
 
         const preventContext = (e) => {
             e.preventDefault();
-            showModal("Input Restricted", "Security policy enforces clipboard lockdowns.", "info");
+            showModal("System Locked", "This system enforces high clipboard security protocols.", "info");
         };
 
         const requestFullscreenMode = () => {
@@ -1614,7 +1668,7 @@
                     video.srcObject = stream;
                 })
                 .catch(err => {
-                    showModal("Proctoring Alert", "Webcam hardware missing or permission denied. Environment parameters invalidated.", "alert");
+                    showModal("Camera Blocked", "Webcam hardware missing or security access blocked. Session validated with warnings.", "alert");
                 });
         };
 
@@ -1625,7 +1679,6 @@
             document.removeEventListener('paste', preventContext);
             document.removeEventListener('contextmenu', preventContext);
 
-            // Turn off webcam if running
             const video = document.getElementById('proctor-webcam');
             if (video && video.srcObject) {
                 video.srcObject.getTracks().forEach(track => track.stop());
@@ -1636,25 +1689,22 @@
         };
 
 
-        // --- STREAMING_CHUNK: Build Active Question Panel and response handles... ---
         const renderActiveNode = () => {
             const quiz = state.activeQuiz;
             const idx = state.playerCurrentIndex;
             const q = quiz.questions[idx];
 
             document.getElementById('player-node-number').textContent = `Node ${idx + 1} of ${quiz.questions.length}`;
-            document.getElementById('player-node-points').textContent = `Value: ${q.points || 1} Pt`;
+            document.getElementById('player-node-points').textContent = `Points: ${q.points || 1}`;
             document.getElementById('player-question-text').textContent = q.text;
 
-            // Render navigation buttons active styling
             document.getElementById('btn-player-prev').disabled = idx === 0 || !quiz.settings.allowBackButton;
             if (idx === quiz.questions.length - 1) {
-                document.getElementById('btn-player-next').innerHTML = '<span>Finish & Grade</span> <i data-lucide="check-circle" class="w-4 h-4 ml-1.5"></i>';
+                document.getElementById('btn-player-next').innerHTML = '<span>Finish Session</span> <i data-lucide="check-circle" class="w-4 h-4 ml-1.5"></i>';
             } else {
                 document.getElementById('btn-player-next').innerHTML = '<span>Next Node</span> <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5"></i>';
             }
 
-            // Render progress bar
             if (quiz.settings.showProgressBar) {
                 const perc = Math.round(((idx) / quiz.questions.length) * 100);
                 document.getElementById('player-progress').style.width = `${perc}%`;
@@ -1665,7 +1715,6 @@
 
             const currentVal = state.playerAnswers[q.id] || '';
 
-            // Handle Choice options
             if (q.type === 'Multiple Choice') {
                 q.options.forEach(opt => {
                     const d = document.createElement('div');
@@ -1718,7 +1767,7 @@
                 const input = document.createElement('input');
                 input.type = q.type === 'Numeric' ? 'number' : 'text';
                 input.value = currentVal;
-                input.className = "w-full p-4 border rounded-xl outline-none focus:border-green-500 text-sm";
+                input.className = "w-full p-4 border rounded-xl outline-none focus:border-green-500 text-sm shadow-sm";
                 input.placeholder = "Enter response text here...";
                 input.addEventListener('input', (e) => {
                     state.playerAnswers[q.id] = e.target.value;
@@ -1727,7 +1776,7 @@
             } else if (q.type === 'Essay') {
                 const area = document.createElement('textarea');
                 area.value = currentVal;
-                area.className = "w-full h-32 p-4 border rounded-xl outline-none focus:border-[#008cff] text-sm";
+                area.className = "w-full h-32 p-4 border rounded-xl outline-none focus:border-[#008cff] text-sm shadow-sm";
                 area.placeholder = "Compose comprehensive evaluation metrics here...";
                 area.addEventListener('input', (e) => {
                     state.playerAnswers[q.id] = e.target.value;
@@ -1737,14 +1786,14 @@
                 const input = document.createElement('input');
                 input.type = 'date';
                 input.value = currentVal;
-                input.className = "p-4 border rounded-xl outline-none focus:border-green-500 text-sm";
+                input.className = "p-4 border rounded-xl outline-none focus:border-green-500 text-sm shadow-sm";
                 input.addEventListener('change', (e) => {
                     state.playerAnswers[q.id] = e.target.value;
                 });
                 zone.appendChild(input);
             } else if (q.type === 'Likert Scale') {
                 const row = document.createElement('div');
-                row.className = "flex justify-between items-center bg-gray-50/80 p-6 rounded-xl border border-gray-100";
+                row.className = "flex justify-between items-center bg-gray-50/80 p-6 rounded-xl border border-gray-100 shadow-sm";
                 row.innerHTML = `<span class="text-xs font-bold text-gray-400">Strongly Disagree</span>`;
                 for (let i = 1; i <= 5; i++) {
                     const label = document.createElement('label');
@@ -1763,23 +1812,23 @@
                 zone.appendChild(row);
             } else if (q.type === 'File Upload') {
                 const upload = document.createElement('div');
-                upload.className = "border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50/50 cursor-pointer";
+                upload.className = "border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50/50 cursor-pointer shadow-sm hover:bg-gray-100/50 transition";
                 upload.innerHTML = `
                     <i data-lucide="cloud-upload" class="w-10 h-10 text-gray-300 mx-auto mb-2 animate-bounce"></i>
                     <span class="text-xs font-bold text-gray-500 block">Drag & Drop Secure File Response</span>
-                    <span class="text-[10px] text-gray-400">Simulated Upload Sandbox Completed</span>
+                    <span class="text-[10px] text-gray-400">Simulated Upload Sandbox</span>
                 `;
                 upload.addEventListener('click', () => {
                     state.playerAnswers[q.id] = "Simulated Upload Complete";
-                    showModal("Simulated Upload", "Your file was locked in the submission sandbox successfully.", "success");
+                    showModal("Upload Safe", "Your document was securely logged in the submission sandbox.", "success");
                 });
                 zone.appendChild(upload);
             } else if (q.type === 'Matching' || q.type === 'Ordering') {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.value = currentVal;
-                input.className = "w-full p-4 border rounded-xl outline-none focus:border-green-500 text-sm";
-                input.placeholder = "Specify pairing key configuration layout match (e.g. PairA-Pair1)...";
+                input.className = "w-full p-4 border rounded-xl outline-none focus:border-green-500 text-sm shadow-sm";
+                input.placeholder = "Enter matching/ordering indices (Format: PairA-Pair1)...";
                 input.addEventListener('input', (e) => {
                     state.playerAnswers[q.id] = e.target.value;
                 });
@@ -1789,7 +1838,7 @@
             lucide.createIcons();
         };
 
-        // Player Actions
+        // Navigation Handles
         document.getElementById('btn-player-prev').addEventListener('click', () => {
             if (state.playerCurrentIndex > 0) {
                 state.playerCurrentIndex--;
@@ -1814,8 +1863,6 @@
             const quiz = state.activeQuiz;
             let score = 0;
             let totalPoints = 0;
-            
-            // Core auto-grading algorithm comparison logic
             const answersReportList = [];
 
             quiz.questions.forEach(q => {
@@ -1827,7 +1874,6 @@
                 totalPoints += q.points || 1;
 
                 if (userAns !== undefined && userAns !== '') {
-                    // Specific grading checks depending on the 12 styles
                     if (q.type === 'Checkboxes') {
                         const userArr = Array.isArray(userAns) ? userAns.sort() : [userAns];
                         const expArr = Array.isArray(expected) ? expected.sort() : [expected];
@@ -1876,7 +1922,7 @@
             };
 
             try {
-                // Save result directly to strict path structure (RULE 1 Strict Path: /artifacts/{appId}/public/data/results)
+                // RULE 1 Strict path results: /artifacts/{appId}/public/data/results
                 const ref = collection(db, 'artifacts', appId, 'public', 'data', 'results');
                 await addDoc(ref, resultPayload);
                 
@@ -1884,8 +1930,8 @@
                 renderMetricsPanel(quiz);
                 transitionView('results');
             } catch (err) {
-                console.error("Result save failure:", err);
-                showModal("Record Disrupted", "Unable to sync result metrics safely. Displaying local session scores.", "alert");
+                console.error("Result sync error:", err);
+                showModal("Local Score Recorded", "Unable to establish active cloud logging routes. Scoring matrix rendered locally.", "alert");
                 state.activeResult = resultPayload;
                 renderMetricsPanel(quiz);
                 transitionView('results');
@@ -1893,7 +1939,6 @@
         };
 
 
-        // --- STREAMING_CHUNK: Designing live metrics results visualization... ---
         const renderMetricsPanel = (quizContext) => {
             const res = state.activeResult;
             if (!res) return;
@@ -1920,14 +1965,13 @@
             document.getElementById('result-metric-total').textContent = res.totalPoints;
             document.getElementById('result-metric-warnings').textContent = res.warnings;
 
-            // Render detailed correct/incorrect correction breakdown review
             const reviewContainer = document.getElementById('result-matrix-review');
             reviewContainer.innerHTML = '';
 
             if (res.reports && res.reports.length > 0) {
                 res.reports.forEach((rep, rIdx) => {
                     const box = document.createElement('div');
-                    box.className = `p-4 rounded-xl border ${rep.isPassed ? 'border-green-100 bg-green-50/50' : 'border-red-100 bg-red-50/50'} space-y-2`;
+                    box.className = `p-4 rounded-xl border ${rep.isPassed ? 'border-green-100 bg-green-50/50' : 'border-red-100 bg-red-50/50'} space-y-2 shadow-sm`;
                     
                     box.innerHTML = `
                         <div class="flex justify-between items-center">
@@ -1943,14 +1987,13 @@
                     reviewContainer.appendChild(box);
                 });
             } else {
-                reviewContainer.innerHTML = `<p class="text-xs text-gray-400 italic">No detailed reviews logged.</p>`;
+                reviewContainer.innerHTML = `<p class="text-xs text-gray-400 italic">No metrics generated.</p>`;
             }
         };
 
         document.getElementById('btn-result-close').addEventListener('click', () => {
-            applySystemTheme('hype'); // Return back to classic green
+            applySystemTheme('hype');
             
-            // Remove direct play search parameters to prevent quiz boot loop
             if (window.location.search) {
                 window.history.pushState({}, document.title, window.location.pathname);
                 state.directQuizId = null;
@@ -1959,13 +2002,13 @@
         });
 
 
-        // --- RUNNING SYSTEM INITIALIZATION WORKSPACE ---
+        // --- MAIN SYSTEM WORKSPACE LAUNCH ---
         window.onload = () => {
             initFirebase();
             initBuilderToolbars();
             applySystemTheme('hype');
+            setAuthMode(true);
             transitionView('auth');
         };
     </script>
 </body>
-</html>
